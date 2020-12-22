@@ -3,30 +3,39 @@ import { API_URL } from "../utils/api";
 import { animes } from "../actions";
 import { connect } from "react-redux";
 const Search = (props) => {
-  const [anime, setanime] = useState("");
-  const [key, setKey] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const { setResults, setLimit, animes } = props;
+  const [inputValue, setInputValue] = useState("");
+  const {
+    setResults,
+    setLimit,
+    animes,
+    setanime,
+    setKey,
+    setLoading,
+    setLastPage,
+  } = props;
 
   const search = (e) => {
     e.preventDefault();
     setLoading(true);
-    setanime("");
     setResults([]);
-    setLimit(6);
-    let url = `${API_URL}?q=${anime}`;
+    animes([]);
+    setanime(inputValue);
+    let url = `${API_URL}?q=${inputValue}&limit=15&page=1`;
     setKey(url);
     fetch(url)
       .then((response) => response.json())
       .then((jsondata) => {
         setLoading(false);
+        setLastPage(jsondata.last_page);
+        setLimit(2);
+        console.log(jsondata.last_page);
         if (jsondata.results) {
           animes(jsondata.results);
         } else {
           animes([]);
         }
       });
+    setInputValue("");
   };
 
   return (
@@ -39,8 +48,8 @@ const Search = (props) => {
               className="form-control"
               required
               minLength="3"
-              value={anime}
-              onChange={(e) => setanime(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
             />
           </div>
           <div className="submit_btn">
@@ -50,14 +59,6 @@ const Search = (props) => {
           </div>
         </div>
       </form>
-      <p className="api_text"> {key}</p>
-      {loading && (
-        <img
-          className="load"
-          src="https://i2.wp.com/codemyui.com/wp-content/uploads/2015/06/windows-8-busy-loader-in-pure-css.gif?fit=880%2C440&ssl=1"
-          alt="Loading..."
-        />
-      )}
     </div>
   );
 };
